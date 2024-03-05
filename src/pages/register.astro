@@ -1,0 +1,40 @@
+---
+import Layout from "../layouts/Layout.astro";
+import DryerButton from "../components/DryerButton.astro";
+const dryers = [10, 11, 12, 13, 14, 15, 16, 17];
+---
+
+<Layout>
+    <main>
+        <h1>Register dryer</h1>
+        <p>Select the dryer or dryers you are using. Enter an e-mail that will receive the notification and the click “Register”.</p>
+        <h2>Available dryers</h2>
+        <div id="dryerList">
+            {dryers.map(dryer => <DryerButton num={dryer} />)}
+        </div>
+    </main>
+</Layout>
+
+<style>
+    h2{
+        align-self: flex-start;
+    }
+
+    #dryerList{
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+    }
+
+ 
+</style>
+
+<script>
+    // Get all dryer buttons
+    const dryerButtons = document.querySelectorAll(".dryerButton");
+    dryerButtons.forEach(button => {
+        button.addEventListener("click", ()=>{
+            console.log(button);
+            button.classList.add("isSelected");
+        });
+    });
+</script>

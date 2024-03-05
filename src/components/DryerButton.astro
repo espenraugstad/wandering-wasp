@@ -1,0 +1,30 @@
+---
+const { num } = Astro.props
+---
+<button id={num} class="dryerButton">{num}</button>
+
+<style>
+    button{
+        background-color: #6DCC5D;
+        color: black;
+        border: none;
+        width: 50px;
+        height: 50px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 5px;
+        margin: .75rem;
+        cursor: pointer;
+        font-size: 1.2rem;
+        font-weight: 600;
+    }
+
+    .isTaken{
+        background-color: #FF3535;
+    }
+
+    .isSelected{
+        border: 5px solid black;
+    }
+</style>

@@ -1,0 +1,28 @@
+---
+let { href, target = "_self" } = Astro.props;
+/* if(!target) {target="_self"};
+console.log(target); */
+---
+<a href={href} target={target}>
+    <slot />
+</a>
+
+<style>
+    a {
+        display: inline-flex;
+        text-decoration: none;
+        background-color: green;
+        padding: 0.5rem;
+        border-radius: 0.5rem;
+        margin: .5rem;
+        min-width: 8ch;
+        min-height: 4ch;
+        justify-content: center;
+        align-items: center;
+        font-weight: 500;
+        color: white;
+    }
+    a:hover {
+        background-color: darkgreen;
+    }
+</style>
