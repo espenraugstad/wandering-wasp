@@ -1,40 +1,92 @@
 ---
+import { supabase } from "../lib/supabase";
 import Layout from "../layouts/Layout.astro";
 import DryerButton from "../components/DryerButton.astro";
+import ActionButton from "../components/ActionButton.astro";
+
+// Get all registrations from db
+let registeredDryers = [];
+const { data, error } = await supabase.from("registrations").select("*");
+if (!error) {
+  console.log("Data:");
+  console.log(data);
+  // Loop through selection data and extract arrays of dryers.
+  for (let registration of data) {
+    registeredDryers = registeredDryers.concat(JSON.parse(registration.dryers));
+  }
+} else {
+  console.error(error);
+}
+
+// All available dryers
 const dryers = [10, 11, 12, 13, 14, 15, 16, 17];
 ---
 
 <Layout>
-    <main>
-        <h1>Register dryer</h1>
-        <p>Select the dryer or dryers you are using. Enter an e-mail that will receive the notification and the click “Register”.</p>
-        <h2>Available dryers</h2>
-        <div id="dryerList">
-            {dryers.map(dryer => <DryerButton num={dryer} />)}
-        </div>
-    </main>
+  <main>
+    <h1>Register dryer</h1>
+    <p>
+      Select the dryer or dryers you are using. Enter an e-mail that will
+      receive the notification and the click “Register”.
+    </p>
+    <h3>Available dryers</h3>
+    <div id="dryerList">
+      {
+        dryers.map((dryer) => (
+          <DryerButton
+            num={dryer}
+            isTaken={registeredDryers.includes(dryer) ? "isTaken" : ""}
+          />
+        ))
+      }
+    </div>
+    <h3>Your e-mail</h3>
+    <input type="text" name="" id="email" />
+    <ActionButton id="register">Register</ActionButton>
+  </main>
 </Layout>
 
 <style>
-    h2{
-        align-self: flex-start;
-    }
+  h3 {
+    align-self: flex-start;
+  }
 
-    #dryerList{
-        display: grid;
-        grid-template-columns: repeat(4, 1fr);
-    }
-
- 
+  #dryerList {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+  }
 </style>
 
 <script>
-    // Get all dryer buttons
-    const dryerButtons = document.querySelectorAll(".dryerButton");
-    dryerButtons.forEach(button => {
-        button.addEventListener("click", ()=>{
-            console.log(button);
-            button.classList.add("isSelected");
-        });
+  /*** GLOBAL VARS ***/
+  const dryerButtons = document.querySelectorAll(".dryerButton");
+  const email = document.getElementById("email") as HTMLInputElement;
+  const register = document.getElementById("register");
+
+  let selectedDryers = [];
+
+  /*** EVENT LISTENERS ***/
+  // Get all dryer buttons
+  dryerButtons.forEach((button) => {
+    button.addEventListener("click", (e) => {
+      if (!button.classList.contains("isTaken")) {
+        // Find the index of this button in the selectedDryers array
+        let indexInSelectedDryers = selectedDryers.findIndex(
+          (el) => el === button.id
+        );
+        if (indexInSelectedDryers === -1) {
+          button.classList.add("isSelected");
+          selectedDryers.push(button.id);
+        } else {
+          button.classList.remove("isSelected");
+          selectedDryers.splice(indexInSelectedDryers, 1);
+        }
+      }
     });
+  });
+
+  register.addEventListener("click", () => {
+    console.log("Sending email and more to database");
+    console.log(selectedDryers);
+  });
 </script>
