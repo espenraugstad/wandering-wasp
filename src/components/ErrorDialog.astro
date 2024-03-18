@@ -1,0 +1,47 @@
+---
+import ActionButton from "./ActionButton.astro";
+const { id, message } = Astro.props;
+---
+
+<error-dialog>
+  <dialog id={id}>
+    <div class="errorDialogMain">
+      <h2>Oisann! Her gikk noe galt.</h2>
+      {message.split("\n").map(msg => <p>{msg}</p>)}
+      <ActionButton>OK</ActionButton>
+    </div>
+  </dialog>
+</error-dialog>
+
+<script>
+  class ErrorDialog extends HTMLElement {
+    constructor() {
+      super();
+
+      const okBtn = this.querySelector("button");
+      okBtn.addEventListener("click", () => {
+        const dialog = this.querySelector("dialog");
+        dialog.close();
+      });
+    }
+  }
+
+  customElements.define("error-dialog", ErrorDialog);
+</script>
+
+<style>
+  .errorDialogMain {
+    display: flex;
+    flex-direction: column;
+    min-width: min(80vw, 400px);
+    align-items: center;
+    padding: 0 0.5rem;
+  }
+
+  dialog::backdrop {
+    background: rgba(0, 0, 0, 0.75);
+  }
+
+  button {
+  }
+</style>

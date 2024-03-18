@@ -3,6 +3,7 @@ import { supabase } from "../lib/supabase";
 import Layout from "../layouts/Layout.astro";
 import DryerButton from "../components/DryerButton.astro";
 import ActionButton from "../components/ActionButton.astro";
+import ErrorDialog from "../components/ErrorDialog.astro";
 
 // Get all registrations from db
 let registeredDryers = [];
@@ -44,6 +45,14 @@ const dryers = [10, 11, 12, 13, 14, 15, 16, 17];
     <input type="text" name="" id="email" />
     <ActionButton id="register">Register</ActionButton>
   </main>
+  <ErrorDialog
+    id="errSelection"
+    message="Du må velge minst en tørketrommmel."
+  />
+  <ErrorDialog
+    id="errMail"
+    message="E-posten du skrev inn er ugyldig.\n (Merk: adresser med æøå i navnet er ikke gyldige.)"
+  />
 </Layout>
 
 <style>
@@ -86,7 +95,44 @@ const dryers = [10, 11, 12, 13, 14, 15, 16, 17];
   });
 
   register.addEventListener("click", () => {
-    console.log("Sending email and more to database");
-    console.log(selectedDryers);
+    let recipient = email.value;
+    try {
+      validateInput(selectedDryers, recipient);
+      console.log(recipient);
+      console.log("Sending email and more to database");
+      console.log(selectedDryers);
+    } catch (error) {
+      console.error(error.message);
+      if (error.message === "selection") {
+        const errSelection = document.getElementById(
+          "errSelection"
+        ) as HTMLDialogElement;
+        errSelection.showModal();
+      } else if (error.message === "mail") {
+        const errMail = document.getElementById("errMail") as HTMLDialogElement;
+        errMail.showModal();
+      } else {
+        console.log("Annen feil");
+      }
+    }
   });
+
+  /*** UTILITY FUNCTIONS ***/
+  function validateInput(arrayOfDryers: Array<string>, emailAddress: string) {
+    if (arrayOfDryers.length === 0) {
+      throw new Error("selection");
+    }
+
+    // Regular expression for validating e-mails
+    // Source: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input/email#validation
+    const re =
+      /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/;
+    console.log(re.test(emailAddress));
+
+    if (!re.test(emailAddress)) {
+      throw new Error("mail");
+    }
+  }
 </script>
+
+<style></style>
