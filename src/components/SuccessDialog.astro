@@ -2,40 +2,42 @@
 import ActionButton from "./ActionButton.astro";
 const { id, message } = Astro.props;
 
-interface Props{
-    id: string,
-    message: string,
+interface Props {
+  id: string;
+  message: string;
 }
 ---
 
-<error-dialog>
+<success-dialog>
   <dialog id={id}>
-    <div class="errorDialogMain">
-      <h2>Oh no! Something went wrong.</h2>
-      {message.split("\n").map(msg => <p>{msg}</p>)}
+    <div class="successDialogMain">
+      <h2>Great Success!</h2>
+      {message.split("\n").map((msg) => <p>{msg}</p>)}
       <ActionButton>OK</ActionButton>
     </div>
   </dialog>
-</error-dialog>
+</success-dialog>
 
 <script>
-  class ErrorDialog extends HTMLElement {
+  class SuccessDialog extends HTMLElement {
     constructor() {
       super();
 
       const okBtn = this.querySelector("button");
-      okBtn.addEventListener("click", () => {
+      okBtn?.addEventListener("click", () => {
         const dialog = this.querySelector("dialog");
-        dialog.close();
+        dialog?.close();
+
+        location.reload();
       });
     }
   }
 
-  customElements.define("error-dialog", ErrorDialog);
+  customElements.define("success-dialog", SuccessDialog);
 </script>
 
 <style>
-  .errorDialogMain {
+  .successDialogMain {
     display: flex;
     flex-direction: column;
     min-width: min(80vw, 400px);

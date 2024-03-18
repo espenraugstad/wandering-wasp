@@ -1,0 +1,103 @@
+---
+import { supabase } from "../lib/supabase";
+import Layout from "../layouts/Layout.astro";
+import DryerButton from "../components/DryerButton.astro";
+import ActionButton from "../components/ActionButton.astro";
+import SuccessDialog from "../components/SuccessDialog.astro";
+
+// Get all registrations from db
+let registeredDryers = [];
+const { data, error } = await supabase.from("registrations").select("*");
+if (!error) {
+  /* console.log("Data:"); */
+  //console.log(data);
+  // Loop through selection data and extract arrays of dryers.
+  for (let registration of data) {
+    if (registration.dryers !== "") {
+      registeredDryers = registeredDryers.concat(
+        JSON.parse(registration.dryers)
+      );
+    }
+  }
+} else {
+  console.error(error);
+}
+
+registeredDryers.sort();
+---
+
+<Layout>
+  <main>
+    <h1>Send notification</h1>
+    <p>Click the number for the dryer(s) you wish to notify.</p>
+    <p>
+      Once a notification is sent, the dryer(s) will be available for
+      registration again.
+    </p>
+    <div id="dryerList">
+      {
+        registeredDryers.map((dryer) => (
+          <DryerButton num={dryer} isTaken={"isNotify"} />
+        ))
+      }
+    </div>
+    <ActionButton id="notify">Notify Selected</ActionButton>
+  </main>
+</Layout>
+<SuccessDialog id="notified" message="Your notification has been sent." />
+
+<style>
+  #dryerList {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    margin-bottom: 2rem;
+  }
+</style>
+
+<script>
+  const dryerButtons = document.querySelectorAll(".dryerButton");
+  const notify = document.getElementById("notify");
+  const notified = document.getElementById('notified') as HTMLDialogElement;
+
+  let selectedDryers = [];
+
+  /*** EVENT LISTENERS ***/
+  // Get all dryer buttons
+  dryerButtons.forEach((button) => {
+    button.addEventListener("click", (e) => {
+        // Find the index of this button in the selectedDryers array
+        let indexInSelectedDryers = selectedDryers.findIndex(
+          (el) => el === parseInt(button.id)
+        );
+        if (indexInSelectedDryers === -1) {
+          button.classList.add("isSelected");
+          selectedDryers.push(parseInt(button.id));
+        } else {
+          button.classList.remove("isSelected");
+          selectedDryers.splice(indexInSelectedDryers, 1);
+        }
+      
+    });
+  });
+
+  notify.addEventListener("click", async ()=>{
+    console.log("Notifying");
+    const url = "/api/update";
+    const config = {
+        method: "PUT",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify(selectedDryers)
+    }
+    let response = await fetch(url, config);
+    if(response.status === 200){
+        console.log("Update successful");
+        console.log(response);
+        notified.showModal();
+
+    } else {
+        console.log(response);
+    }
+  });
+</script>

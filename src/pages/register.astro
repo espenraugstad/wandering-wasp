@@ -9,11 +9,14 @@ import ErrorDialog from "../components/ErrorDialog.astro";
 let registeredDryers = [];
 const { data, error } = await supabase.from("registrations").select("*");
 if (!error) {
-  console.log("Data:");
-  console.log(data);
+  //console.log("Data:");
+  //console.log(data);
   // Loop through selection data and extract arrays of dryers.
   for (let registration of data) {
-    registeredDryers = registeredDryers.concat(JSON.parse(registration.dryers));
+    if(registration.dryers !== ""){
+      registeredDryers = registeredDryers.concat(JSON.parse(registration.dryers));
+    }
+    
   }
 } else {
   console.error(error);
@@ -47,19 +50,15 @@ const dryers = [10, 11, 12, 13, 14, 15, 16, 17];
   </main>
   <ErrorDialog
     id="errSelection"
-    message="Du må velge minst en tørketrommmel."
+    message="You have to chose at least one dryer."
   />
   <ErrorDialog
     id="errMail"
-    message="E-posten du skrev inn er ugyldig.\n (Merk: adresser med æøå i navnet er ikke gyldige.)"
+    message="The email you entered is invalid.\n (Note: addresses containing æøå in the name are invalid.)"
   />
 </Layout>
 
 <style>
-  h3 {
-    align-self: flex-start;
-  }
-
   #dryerList {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
@@ -81,11 +80,11 @@ const dryers = [10, 11, 12, 13, 14, 15, 16, 17];
       if (!button.classList.contains("isTaken")) {
         // Find the index of this button in the selectedDryers array
         let indexInSelectedDryers = selectedDryers.findIndex(
-          (el) => el === button.id
+          (el) => el === parseInt(button.id)
         );
         if (indexInSelectedDryers === -1) {
           button.classList.add("isSelected");
-          selectedDryers.push(button.id);
+          selectedDryers.push(parseInt(button.id));
         } else {
           button.classList.remove("isSelected");
           selectedDryers.splice(indexInSelectedDryers, 1);
@@ -94,13 +93,31 @@ const dryers = [10, 11, 12, 13, 14, 15, 16, 17];
     });
   });
 
-  register.addEventListener("click", () => {
+  register.addEventListener("click", async () => {
     let recipient = email.value;
     try {
       validateInput(selectedDryers, recipient);
-      console.log(recipient);
-      console.log("Sending email and more to database");
-      console.log(selectedDryers);
+
+      // If input is ok, send to server.
+      const url = "/api/register";
+      const config = {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          recipient,
+          dryers: JSON.stringify(selectedDryers)
+        })
+      }
+      let res = await fetch(url, config);
+      if(res.status === 200){
+        let info = await res.json();
+        console.log(info.data[0]);
+        sessionStorage.setItem("registration", JSON.stringify(info.data[0]));
+        location.href="/thankyou";
+      }
+      
     } catch (error) {
       console.error(error.message);
       if (error.message === "selection") {
@@ -127,7 +144,6 @@ const dryers = [10, 11, 12, 13, 14, 15, 16, 17];
     // Source: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input/email#validation
     const re =
       /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/;
-    console.log(re.test(emailAddress));
 
     if (!re.test(emailAddress)) {
       throw new Error("mail");

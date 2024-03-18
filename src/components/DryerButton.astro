@@ -5,7 +5,7 @@ const { num, isTaken } = Astro.props
 
 <style>
     button{
-        background-color: #6DCC5D;
+        background-color: hsl(111, 52%, 58%);
         color: black;
         border: none;
         width: 50px;
@@ -29,10 +29,17 @@ const { num, isTaken } = Astro.props
     .isTaken:hover{
         background-color: #FF3535;
         cursor: default;
-
     }
 
     .isSelected{
         border: 5px solid black;
+    }
+
+    .isNotify{
+        background-color: hsl(60, 100%, 50%);
+    }
+
+    .isNotify:hover{
+        background-color: hsl(60, 100%, 40%);
     }
 </style>
