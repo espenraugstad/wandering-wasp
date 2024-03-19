@@ -1,5 +1,7 @@
 import type { APIRoute } from "astro";
 import { supabase } from "../../lib/supabase";
+import { resend } from "../../lib/resend";
+
 
 export const PUT: APIRoute = async ({ request }) => {
   if (request.headers.get("Content-Type") === "application/json") {
@@ -83,6 +85,19 @@ export const PUT: APIRoute = async ({ request }) => {
 
 async function notify(email: string, dryers: number[]) {
     for(const dryer of dryers){
+      //@ts-ignore
+        const { data, error } = await resend.emails.send({
+          from: "Notificator <notification@notification.decade21.com>",
+          to: email,
+          subject: `Dryer ${dryer} is done!`,
+          html: "You can now pick up your clothes."
+        });
+
+        if(error){
+          console.error(error);
+        } else {
+          console.log(data);
+        }
         console.log(
             `Notifying ${email} that dryer ${dryer} is finished.`
           );
