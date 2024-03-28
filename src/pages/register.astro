@@ -23,7 +23,7 @@ if (!error) {
 }
 
 // All available dryers
-const dryers = [10, 11, 12, 13, 14, 15, 16, 17];
+const dryers = [10, 11, 12, 13, 14, 15, 16];
 ---
 
 <Layout>
@@ -45,7 +45,7 @@ const dryers = [10, 11, 12, 13, 14, 15, 16, 17];
       }
     </div>
     <h3>Your e-mail</h3>
-    <input type="text" name="" id="email" />
+    <input type="text" name="" id="email" autocapitalize="off" />
     <ActionButton id="register">Submit</ActionButton>
   </main>
   <ErrorDialog
