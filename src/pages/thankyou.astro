@@ -1,29 +1,54 @@
 ---
-import Layout from "../layouts/Layout.astro"
+import Layout from "../layouts/Layout.astro";
 import NavButton from "../components/NavButton.astro";
+import ActionButton from "../components/ActionButton.astro";
 ---
 
 <Layout>
-    <main>
-        <h1>Thank you</h1>
-        <p>If someone notifies you, a mail will be sent to the following address:</p>
-        <p id="mail"></p>
-        <p>You can notify yourself if you pick up your clothes before a notification is sent.</p>
-        <NavButton href="/">Home</NavButton>
-    </main>
-    
+  <main>
+    <h1>Thank you</h1>
+    <p id="resmsg"></p>
+    <p id="mail"></p>
+    <p>
+      You can notify yourself if you pick up your clothes before someone else
+      sends you a notification.
+    </p>
+    <NavButton href="/">Home</NavButton>
+  </main>
 </Layout>
 <script>
-    window.onload = ()=>{
-        let registrationInfo = JSON.parse(sessionStorage.getItem("registration"));
-        const mail = document.getElementById('mail');
-        mail.innerText = registrationInfo.email;
+    const resmsg = document.getElementById('resmsg');
+
+  window.onload = () => {
+    let registrationInfo = JSON.parse(sessionStorage.getItem("registration"));
+    const mail = document.getElementById("mail");
+    mail.innerText = registrationInfo.email;
+    sendConfirmation(registrationInfo);
+  };
+
+  async function sendConfirmation(data) {
+    console.log(data);
+    const url = "/api/confirm";
+    const config = {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(data),
+    };
+
+    let res = await fetch(url, config);
+    if(res.status === 200){
+        resmsg.innerText = "A mail was sent to the address below to confirm your registration. (Check your spam folder if you can't find it.)"
+    } else {
+        resmsg.innerText = "Hmmm...we tried to send you a confirmation e-mail, but somehting seems to have gone wrong.";
     }
+  }
 </script>
 
 <style>
-    #mail{
-        padding: 2rem;
-        box-shadow: 0px 0px 5px 1px rgba(0, 0, 0, 0.20);
-    }
+  #mail {
+    padding: 2rem;
+    box-shadow: 0px 0px 5px 1px rgba(0, 0, 0, 0.2);
+  }
 </style>
